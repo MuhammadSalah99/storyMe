@@ -54,8 +54,8 @@ const Slider: React.FC<SlidesProps> = ({ slides }) => {
                 className='relative w-full h-full rounded-2xl bg-center bg-cover duration-1000 transition-all'
             >
 
-            {slides[currentIndex].elements.map((elem) => (
-               <div dangerouslySetInnerHTML={{__html: elem}}></div>
+            {slides[currentIndex].elements.map((elem, i) => (
+               <div key={i} dangerouslySetInnerHTML={{__html: elem}}></div>
                ))}
 
             </div>
