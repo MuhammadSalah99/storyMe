@@ -157,7 +157,6 @@ export default function CreateSlider() {
 
     }
 
-   
 
     const handleOnClickDuration = (id: string | undefined, duration: any) => {
 
@@ -226,12 +225,14 @@ export default function CreateSlider() {
     const handleSubmit = (e: React.FormEvent) => {
 
         e.preventDefault();
-        const h1 =generateElement();
+        const h1 = generateElement();
         setElements([...elements, h1]);
 
-        let updatedSlide = { ...slideInPreview!, elements: elements }
 
-        setSlideInPreview(updatedSlide);
+        setSlideInPreview((prevSlideInPreview: any) => {
+            const updatedSlide = { ...prevSlideInPreview, elements: [...elements, h1] };
+            return updatedSlide;
+        });
         setSliderImages((prevSliderImages) =>
             prevSliderImages.map((slide) =>
                 slide.id === slideInPreview?.id ? { ...slide, elements: elements } : slide
