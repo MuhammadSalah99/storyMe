@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useSyncExternalStore } from 'react'
+import { useState, useEffect } from 'react'
 import { storage, database } from '../../../../../firebase'
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import { useRouter } from 'next/navigation'
@@ -18,13 +18,26 @@ export default function CreateSlider() {
     const [errorMessage, setErrorMessage] = useState(false);
     const [elements, setElements] = useState<any>([]);
     const [h1Open, setH1Open] = useState(false)
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        fontSize: string;
+        color: string;
+        content: string;
+        position?: {
+            top?: number;
+            left?: number;
+            bottom?: number;
+            right?: number;
+        };
+    }>({
         fontSize: '',
         color: '#000000',
         content: '',
-        position: { top: 0, left: 0, bottom: 0, right: 0 },
-    })
+        position: {} // You can initialize it with an empty object or omit it altogether
+    });
 
+    const [positonButtons, setPositionButtons] = useState<string | null>(null)
+
+    const buttons = ["Top Left", "Top Right", "Bottom Right", "Bottom Left", "Center"]
     const router = useRouter()
 
     const handleRemoveSlide = (slideRef: any, id: any) => {
@@ -144,20 +157,7 @@ export default function CreateSlider() {
 
     }
 
-    const addH1Element = (id: any) => {
-        //font size color postion 
-        //add a way to show all elemens then have an x button so you can delete that element 
-        //Add a link option with href
-        //
-        setSlideInPreview({ ...slideInPreview!, elements: ["<h1 style='color: red; position: absolute; top: 10px; left: 20px; font-size: 22px'>Hi</h1>"] })
-        const updatedSlides = sliderImages.map((slide) =>
-            slide.id === id ? { ...slide, elements: ["<h1 style='color: red; position: absolute; top: 10px; left: 20px; font-size: 22px'>Hi</h1>"] } : slide
-        );
-
-        setSliderImages(updatedSlides);
-
-
-    }
+   
 
     const handleOnClickDuration = (id: string | undefined, duration: any) => {
 
@@ -186,28 +186,64 @@ export default function CreateSlider() {
 
     }
 
+    const generateElement = () => {
+        let h1;
+        switch (positonButtons) {
+            case "Top Left":
+
+                h1 = `<h1 style='color: ${formData.color}; position: absolute; top: 10px; left: 40px; font-size: ${formData.fontSize}px'>${formData.content}</h1>`;
+                break;
+
+            case "Top Right":
+
+
+                h1 = `<h1 style='color: ${formData.color}; position: absolute; top: 10px; right: 40px; font-size: ${formData.fontSize}px'>${formData.content}</h1>`;
+                break;
+            case "Bottom Right":
+
+                h1 = `<h1 style='color: ${formData.color}; position: absolute; bottom: 10px; right: 40px; font-size: ${formData.fontSize}px'>${formData.content}</h1>`;
+                break;
+            case "Bottom Left":
+
+                h1 = `<h1 style='color: ${formData.color}; position: absolute; bottom: 10px; left: 40px; font-size: ${formData.fontSize}px'>${formData.content}</h1>`;
+                break;
+            case "Center":
+
+                h1 = `<h1 style='color: ${formData.color}; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: ${formData.fontSize}px'>${formData.content}</h1>`;
+                break;
+
+            default:
+                console.log("no");
+                break;
+
+        }
+
+        return h1;
+    }
+
+
+
     const handleSubmit = (e: React.FormEvent) => {
+
         e.preventDefault();
-        setH1Open(false)
-        let h1 = `<h1 style='color: ${formData.color}; position: absolute; top: ${formData.position.left}px; left: ${formData.position.left}px; right: ${formData.position.right}px; bottom: ${formData.position.bottom}px; font-size: ${formData.fontSize}px'>${formData.content}</h1>`
-        setTimeout(() => {
-            setSlideInPreview({ ...slideInPreview!, elements: elements })
-            setElements([...elements, h1])
-            const updatedSlides = sliderImages.map((slide) =>
+        const h1 =generateElement();
+        setElements([...elements, h1]);
+
+        let updatedSlide = { ...slideInPreview!, elements: elements }
+
+        setSlideInPreview(updatedSlide);
+        setSliderImages((prevSliderImages) =>
+            prevSliderImages.map((slide) =>
                 slide.id === slideInPreview?.id ? { ...slide, elements: elements } : slide
-            );
-            setSliderImages(updatedSlides)
-            console.log(sliderImages)
-        }, 500)
-        console.log('Form Data:', formData);
+            )
+        );
+
+
+        setH1Open(false)
+
     };
 
-    const handlePosition = (position: { top: any; left: any, bottom: any, right: any }) => {
-        setFormData({
-            ...formData,
-            position,
-        });
-    };
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -215,6 +251,7 @@ export default function CreateSlider() {
             ...formData,
             [name]: value,
         });
+
     };
 
     return (
@@ -358,41 +395,28 @@ export default function CreateSlider() {
                                     <div className="mb-4">
                                         <label className="block text-gray-600 text-sm font-medium">Position:</label>
                                         <div className="flex space-x-2">
-                                            <button
-                                                type="button"
-                                                className="bg-gray-300 text-gray-600 px-2 py-1 rounded"
-                                                onClick={() => handlePosition({ top: 40, left: 10, bottom: 'auto', right: 'auto' })}
-                                            >
-                                                Top Left
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-gray-300 text-gray-600 px-2 py-1 rounded"
-                                                onClick={() => handlePosition({ top: 40, right: 10, bottom: 'auto', left: 'auto' })}
-                                            >
-                                                Top Right
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-gray-300 text-gray-600 px-2 py-1 rounded"
-                                                onClick={() => handlePosition({ top: 100, left: 0, right: 'auto', bottom: 'auto' })}
-                                            >
-                                                Bottom Left
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-gray-300 text-gray-600 px-2 py-1 rounded"
-                                                onClick={() => handlePosition({ bottom: 0, right: 0, top: 'auto', left: 'auto' })}
-                                            >
-                                                Bottom Right
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-gray-300 text-gray-600 px-2 py-1 rounded"
-                                                onClick={() => handlePosition({ top: 50, left: 50, bottom: 'auto', right: 'auto' })}
-                                            >
-                                                Center
-                                            </button>
+                                            {buttons.map((but) => (
+                                                but === positonButtons ? (
+                                                    <button
+                                                        type="button"
+                                                        key={but}
+                                                        className="bg-blue-600 text-white px-2 py-1 rounded"
+                                                        onClick={() => setPositionButtons(but)}
+                                                    >
+                                                        {but}
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        key={but}
+                                                        className="bg-gray-300 text-gray-600 px-2 py-1 rounded"
+
+                                                        onClick={() => setPositionButtons(but)}
+                                                    >
+                                                        {but}
+                                                    </button>
+                                                )
+                                            ))}
                                         </div>
                                     </div>
                                     <button
@@ -462,7 +486,6 @@ export default function CreateSlider() {
                     <div className='w-[97%] h-[400px] bg-gray-800 flex justify-center'>
                         <div
                             style={{ backgroundImage: `url(${slideInPreview?.image})` }}
-                            onClick={() => addH1Element(slideInPreview?.id)}
                             className='relative w-full h-full rounded-2xl bg-center bg-cover duration-1000 transition-all'
                         >
                             {slideInPreview?.elements.map((elem, i) => (
@@ -478,4 +501,6 @@ export default function CreateSlider() {
             < div className='h-[300px] w-20' ></div >
         </div >
     )
+
+
 }
