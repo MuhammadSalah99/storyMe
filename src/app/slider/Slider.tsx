@@ -10,8 +10,7 @@ interface SlidesProps {
 const Slider: React.FC<SlidesProps> = ({ slides }) => {
 
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [autoSlideInterval, setAutoSlideInterval] = useState<number | null>(null);
-
+    const [autoSlideInterval, setAutoSlideInterval] = useState<NodeJS.Timeout | null>(null);
     const nextSlide = () => {
         setCurrentIndex((prevIndex) =>
             prevIndex === slides.length - 1 ? 0 : prevIndex + 1
@@ -33,7 +32,7 @@ const Slider: React.FC<SlidesProps> = ({ slides }) => {
         if (autoSlideInterval) {
             clearInterval(autoSlideInterval);
         }
-        const intervalId = setInterval(nextSlide, slides[currentIndex].duration);
+        const intervalId = setInterval(nextSlide, parseInt(slides[currentIndex].duration, 10));
         setAutoSlideInterval(intervalId);
     };
 
@@ -54,9 +53,9 @@ const Slider: React.FC<SlidesProps> = ({ slides }) => {
                 className='relative w-full h-full rounded-2xl bg-center bg-cover duration-1000 transition-all'
             >
 
-            {slides[currentIndex].elements.map((elem, i) => (
-               <div key={i} dangerouslySetInnerHTML={{__html: elem}}></div>
-               ))}
+                {slides[currentIndex].elements.map((elem, i) => (
+                    <div key={i} dangerouslySetInnerHTML={{ __html: elem }}></div>
+                ))}
 
             </div>
             <div className='hidden group-hover:block absolute top-[50%] -translate-x-0 translate-y-[-50%] left-5 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer'>
