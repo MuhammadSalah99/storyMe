@@ -72,6 +72,12 @@ export default function CreateSlider() {
 
     }
 
+    function generateId() {
+
+        return Math.random().toString(36).substring(2) +
+            (new Date()).getTime().toString(36);
+    }
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 
         const file = event.target.files?.[0];
@@ -82,7 +88,7 @@ export default function CreateSlider() {
             const uploadPromise = uploadBytes(imageRef, file).then(() => {
                 getDownloadURL(imageRef).then((url) => {
                     let newImage = {
-                        id: (Math.floor(Math.random() * 6) + 1).toString(), image: url, ref: `slides/${file.name}`, duration: '2000', alt: "test", elements: ["<h1></h1>"]
+                        id: generateId(), image: url, ref: `slides/${file.name}`, duration: '2000', alt: "test", elements: ["<h1></h1>"]
                     }
 
                     console.log(selectedImage)
@@ -225,21 +231,30 @@ export default function CreateSlider() {
     const handleSubmit = (e: React.FormEvent) => {
 
         e.preventDefault();
-        const h1 = generateElement();
+        const h1: any = generateElement();
         setElements([...elements, h1]);
+        let elementsArr: string[] = []
 
+        elementsArr.push(h1)
+        console.log(elementsArr)
 
         setSlideInPreview((prevSlideInPreview: any) => {
             const updatedSlide = { ...prevSlideInPreview, elements: [...elements, h1] };
+
             return updatedSlide;
         });
-        setSliderImages((prevSliderImages) =>
-            prevSliderImages.map((slide) =>
-                slide.id === slideInPreview?.id ? { ...slide, elements: elements } : slide
+        setSliderImages((prevSliderImages) => {
+            const updatedSlide = prevSliderImages.map((slide) =>
+                slide.id === slideInPreview?.id ? { ...slide, elements: elementsArr } : slide
+
             )
+            return updatedSlide
+        }
+
         );
+        console.log(slideInPreview)
 
-
+        console.log(sliderImages)
         setH1Open(false)
 
     };
