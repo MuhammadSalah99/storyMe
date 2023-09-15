@@ -9,7 +9,6 @@ const nextConfig = {
             },
         ],
     },
-    distDir: "site"
 }
 
 module.exports = nextConfig
